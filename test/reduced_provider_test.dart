@@ -7,9 +7,7 @@ import 'package:reduced_provider/reduced_provider.dart';
 
 class Incrementer extends Reducer<int> {
   @override
-  int call(int state) {
-    return state + 1;
-  }
+  int call(int state) => state + 1;
 }
 
 void main() {
