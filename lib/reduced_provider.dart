@@ -1,4 +1,4 @@
 // reduced_provider.dart
 
-export 'src/provider_reducible.dart';
-export 'src/provider_wrapper.dart';
+export 'src/provider_store.dart';
+export 'src/provider_widgets.dart';

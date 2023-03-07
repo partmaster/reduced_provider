@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:reduced/reduced.dart';
 
 import 'package:reduced_provider/reduced_provider.dart';
@@ -25,13 +24,5 @@ void main() {
     final objectUnderTest = ValueNotifier(0).reducible;
     objectUnderTest.reduce(Incrementer());
     expect(objectUnderTest.state, 1);
-  });
-
-  test('wrapWithConsumer', () {
-    final objectUnderTest = wrapWithConsumer<int, int>(
-      builder: ({Key? key, required int props}) => const SizedBox(),
-      transformer: (reducible) => 1,
-    );
-    expect(objectUnderTest, isA<Selector<ValueNotifier<int>, int>>());
   });
 }

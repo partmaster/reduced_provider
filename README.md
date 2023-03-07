@@ -7,13 +7,13 @@
 
 Implementation of the 'reduced' API for the 'Provider' state management framework with following features:
 
-1. Implementation of the ```Reducible``` interface 
+1. Implementation of the ```ReducedStore``` interface 
 2. Register a state for management.
 3. Trigger a rebuild on widgets selectively after a state change.
 
 ## Features
 
-#### 1. Implementation of the ```Reducible``` interface 
+#### 1. Implementation of the ```ReducedStore``` interface 
 
 ```dart
 extension ReducibleValueNotifier<S> on ValueNotifier<S> {
@@ -21,36 +21,53 @@ extension ReducibleValueNotifier<S> on ValueNotifier<S> {
 
   void reduce(Reducer<S> reducer) => value = reducer(value);
 
-  Reducible<S> get reducible =>
-      ReducibleProxy(getState, reduce, this);
+  ReducedStore<S> get reducible =>
+      ReducedStoreProxy(getState, reduce, this);
 }
 ```
 
 #### 2. Register a state for management.
 
 ```dart
-Widget wrapWithProvider<S>({
-  required S initialState,
-  required Widget child,
-}) =>
-    ChangeNotifierProvider<ValueNotifier<S>>(
-      create: (context) => ValueNotifier<S>(initialState),
-      child: child,
-    );
+class ReducedProvider<S> extends StatelessWidget {
+  const ReducedProvider({
+    super.key,
+    required this.initialState,
+    required this.child,
+  });
+
+  final S initialState;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      ChangeNotifierProvider<ValueNotifier<S>>(
+        create: (context) => ValueNotifier<S>(initialState),
+        child: child,
+      );
+}
 ```
 
 #### 3. Trigger a rebuild on widgets selectively after a state change.
 
 ```dart
-Widget wrapWithConsumer<S, P>({
-  required ReducedTransformer<S, P> transformer,
-  required ReducedWidgetBuilder<P> builder,
-}) =>
-    Selector<ValueNotifier<S>, P>(
-      builder: (context, props, _) => builder(props: props),
-      selector: (context, notifier) =>
-          transformer(notifier.reducible),
-    );
+class ReducedConsumer<S, P> extends StatelessWidget {
+  const ReducedConsumer({
+    super.key,
+    required this.transformer,
+    required this.builder,
+  });
+
+  final ReducedTransformer<S, P> transformer;
+  final ReducedWidgetBuilder<P> builder;
+
+  @override
+  Widget build(BuildContext context) => Selector<ValueNotifier<S>, P>(
+        builder: (context, props, _) => builder(props: props),
+        selector: (context, notifier) =>
+            transformer(notifier.reducible),
+      );
+}
 ```
 
 ## Getting started
@@ -59,8 +76,8 @@ In the pubspec.yaml add dependencies on the package 'reduced' and on the package
 
 ```
 dependencies:
-  reduced: ^0.1.0
-  reduced_provider: ^0.1.0
+  reduced: ^0.2.0
+  reduced_provider: ^0.2.0
 ```
 
 Import package 'reduced' to implement the logic.
@@ -96,9 +113,9 @@ class Props {
   final Callable<void> onPressed;
 }
 
-Props transformer(Reducible<int> reducible) => Props(
-      counterText: '${reducible.state}',
-      onPressed: CallableAdapter(reducible, Incrementer()),
+Props transformer(ReducedStore<int> store) => Props(
+      counterText: '${store.state}',
+      onPressed: CallableAdapter(store, Incrementer()),
     );
 
 Widget builder({Key? key, required Props props}) => Scaffold(
@@ -137,12 +154,12 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) => wrapWithProvider(
+  Widget build(BuildContext context) => ReducedProvider(
         initialState: 0,
         child: MaterialApp(
           theme: ThemeData(primarySwatch: Colors.blue),
           home: Builder(
-            builder: (context) => wrapWithConsumer(
+            builder: (context) => const ReducedConsumer(
               transformer: transformer,
               builder: builder,
             ),
