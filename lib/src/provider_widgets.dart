@@ -37,6 +37,6 @@ class ReducedConsumer<S, P> extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Selector<ValueNotifier<S>, P>(
         builder: (context, props, _) => builder(props: props),
-        selector: (context, notifier) => transformer(notifier.reducible),
+        selector: (context, notifier) => transformer(notifier.proxy),
       );
 }
