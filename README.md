@@ -21,7 +21,7 @@ extension ReducibleValueNotifier<S> on ValueNotifier<S> {
 
   void reduce(Reducer<S> reducer) => value = reducer(value);
 
-  ReducedStore<S> get reducible =>
+  ReducedStore<S> get proxy =>
       ReducedStoreProxy(getState, reduce, this);
 }
 ```
