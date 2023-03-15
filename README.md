@@ -7,22 +7,21 @@
 
 Implementation of the 'reduced' API for the 'Provider' state management framework with following features:
 
-1. Implementation of the ```ReducedStore``` interface 
+1. Implementation of the ```Store``` interface 
 2. Register a state for management.
 3. Trigger a rebuild on widgets selectively after a state change.
 
 ## Features
 
-#### 1. Implementation of the ```ReducedStore``` interface 
+#### 1. Implementation of the ```Store``` interface 
 
 ```dart
-extension ReducibleValueNotifier<S> on ValueNotifier<S> {
+extension ValueNotifierStore<S> on ValueNotifier<S> {
   S getState() => value;
 
-  void reduce(Reducer<S> reducer) => value = reducer(value);
+  void process(Event<S> event) => value = event(value);
 
-  ReducedStore<S> get proxy =>
-      ReducedStoreProxy(getState, reduce, this);
+  Store<S> get proxy => StoreProxy(getState, process, this);
 }
 ```
 
@@ -54,18 +53,20 @@ class ReducedProvider<S> extends StatelessWidget {
 class ReducedConsumer<S, P> extends StatelessWidget {
   const ReducedConsumer({
     super.key,
-    required this.transformer,
+    required this.mapper,
     required this.builder,
   });
 
-  final ReducedTransformer<S, P> transformer;
-  final ReducedWidgetBuilder<P> builder;
+  final StateToPropsMapper<S, P> mapper;
+  final WidgetFromPropsBuilder<P> builder;
 
   @override
   Widget build(BuildContext context) => Selector<ValueNotifier<S>, P>(
         builder: (context, props, _) => builder(props: props),
-        selector: (context, notifier) =>
-            transformer(notifier.reducible),
+        selector: (context, notifier) => mapper(
+          notifier.getState(),
+          notifier.proxy,
+        ),
       );
 }
 ```
@@ -76,8 +77,8 @@ In the pubspec.yaml add dependencies on the package 'reduced' and on the package
 
 ```
 dependencies:
-  reduced: ^0.2.0
-  reduced_provider: ^0.2.0
+  reduced: 0.4.0
+  reduced_provider: 0.4.0
 ```
 
 Import package 'reduced' to implement the logic.
@@ -102,7 +103,7 @@ Implementation of the counter demo app logic with the 'reduced' API without furt
 import 'package:flutter/material.dart';
 import 'package:reduced/reduced.dart';
 
-class Incrementer extends Reducer<int> {
+class CounterIncremented extends Event<int> {
   @override
   int call(int state) => state + 1;
 }
@@ -113,9 +114,9 @@ class Props {
   final Callable<void> onPressed;
 }
 
-Props transformer(ReducedStore<int> store) => Props(
-      counterText: '${store.state}',
-      onPressed: CallableAdapter(store, Incrementer()),
+Props transformer(int state, EventProcessor<int> processor) => Props(
+      counterText: '${state}',
+      onPressed: EventCarrier(processor, CounterIncremented()),
     );
 
 Widget builder({Key? key, required Props props}) => Scaffold(
@@ -160,7 +161,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(primarySwatch: Colors.blue),
           home: Builder(
             builder: (context) => const ReducedConsumer(
-              transformer: transformer,
+              mapper: transformer,
               builder: builder,
             ),
           ),
