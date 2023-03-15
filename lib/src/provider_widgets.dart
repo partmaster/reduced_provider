@@ -27,16 +27,19 @@ class ReducedProvider<S> extends StatelessWidget {
 class ReducedConsumer<S, P> extends StatelessWidget {
   const ReducedConsumer({
     super.key,
-    required this.transformer,
+    required this.mapper,
     required this.builder,
   });
 
-  final ReducedTransformer<S, P> transformer;
-  final ReducedWidgetBuilder<P> builder;
+  final StateToPropsMapper<S, P> mapper;
+  final WidgetFromPropsBuilder<P> builder;
 
   @override
   Widget build(BuildContext context) => Selector<ValueNotifier<S>, P>(
         builder: (context, props, _) => builder(props: props),
-        selector: (context, notifier) => transformer(notifier.proxy),
+        selector: (context, notifier) => mapper(
+          notifier.getState(),
+          notifier.proxy,
+        ),
       );
 }

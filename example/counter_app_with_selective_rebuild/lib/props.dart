@@ -3,7 +3,7 @@
 import 'package:reduced/reduced.dart';
 
 class MyHomePageProps {
-  MyHomePageProps({
+  const MyHomePageProps({
     required this.onPressed,
     required this.title,
   });

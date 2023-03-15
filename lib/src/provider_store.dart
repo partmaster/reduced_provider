@@ -3,11 +3,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:reduced/reduced.dart';
 
-/// Extension on class [ValueNotifier] with support of the [ReducedStore] interface.
-extension ReducibleValueNotifier<S> on ValueNotifier<S> {
+/// Extension on class [ValueNotifier] with support of the [Store] interface.
+extension ValueNotifierStore<S> on ValueNotifier<S> {
   S getState() => value;
 
-  void dispatch(Event<S> event) => value = event(value);
+  void process(Event<S> event) => value = event(value);
 
-  ReducedStore<S> get proxy => ReducedStoreProxy(getState, dispatch, this);
+  Store<S> get proxy => StoreProxy(getState, process, this);
 }
