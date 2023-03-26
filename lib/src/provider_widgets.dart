@@ -43,16 +43,3 @@ class ReducedConsumer<S, P> extends StatelessWidget {
         ),
       );
 }
-
-class DistinctEventListenerDecorator<S> {
-  DistinctEventListenerDecorator(this.decorated);
-  final EventListener<S>? decorated;
-  UniqueKey? key;
-
-  void call(Store<S> store, Event<S> event, UniqueKey key) {
-    if (this.key != key) {
-      this.key = key;
-      decorated?.call(store, event, key);
-    }
-  }
-}
