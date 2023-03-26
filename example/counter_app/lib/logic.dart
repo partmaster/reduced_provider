@@ -1,6 +1,6 @@
 // logic.dart
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Action;
 import 'package:reduced/reduced.dart';
 
 class CounterIncremented extends Event<int> {
@@ -15,8 +15,8 @@ class Props {
 }
 
 Props transformer(int state, EventProcessor<int> processor) => Props(
-      counterText: '${state}',
-      onPressed: EventCarrier(processor, CounterIncremented()),
+      counterText: '$state',
+      onPressed: Action(processor, CounterIncremented()),
     );
 
 Widget builder({Key? key, required Props props}) => Scaffold(
