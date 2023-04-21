@@ -31,15 +31,15 @@ class ReducedConsumer<S, P> extends StatelessWidget {
     required this.builder,
   });
 
-  final StateToPropsMapper<S, P> mapper;
+  final SnapshotToPropsMapper<S, P> mapper;
   final WidgetFromPropsBuilder<P> builder;
 
   @override
   Widget build(BuildContext context) => Selector<ValueNotifier<S>, P>(
         builder: (context, props, _) => builder(props: props),
         selector: (context, notifier) => mapper(
-          notifier.getState(),
-          notifier.proxy,
+          StoreSnapshot(notifier.getState(), notifier.proxy),
+          null,
         ),
       );
 }
